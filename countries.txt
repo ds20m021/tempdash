@@ -1,0 +1,176 @@
+Name
+Bahamas
+Belize
+Canada
+Costa Rica
+Cuba
+Honduras
+Haiti
+Jamaica
+Mexico
+Greenland
+Guatemala
+Dominican Rep.
+Nicaragua
+Panama
+Puerto Rico
+El Salvador
+Trinidad and Tobago
+United States
+Argentina
+Ecuador
+Colombia
+Guyana
+Chile
+Falkland Is.
+Bolivia
+Paraguay
+Peru
+Brazil
+Suriname
+Uruguay
+Venezuela
+Armenia
+Azerbaijan
+Afghanistan
+United Arab Emirates
+Bangladesh
+Brunei
+China
+Bhutan
+N. Cyprus
+Cyprus
+Georgia
+Indonesia
+India
+Iran
+Israel
+Japan
+Iraq
+Jordan
+Kyrgyzstan
+Kazakhstan
+Korea
+Lao PDR
+Kuwait
+Sri Lanka
+Lebanon
+Cambodia
+Myanmar
+Mongolia
+Malaysia
+Nepal
+Pakistan
+Oman
+Philippines
+Dem. Rep. Korea
+Saudi Arabia
+Qatar
+Palestine
+Syria
+Timor-Leste
+Turkmenistan
+Tajikistan
+Uzbekistan
+Taiwan
+Vietnam
+Thailand
+Turkey
+Angola
+Burundi
+Benin
+Yemen
+Central African Rep.
+Burkina Faso
+Côte d'Ivoire
+Cameroon
+Botswana
+Dem. Rep. Congo
+Djibouti
+Congo
+Algeria
+Egypt
+Eritrea
+Gabon
+Ethiopia
+Ghana
+Guinea
+Gambia
+Libya
+Guinea-Bissau
+Eq. Guinea
+Kenya
+Liberia
+Morocco
+Lesotho
+Madagascar
+Mali
+Mozambique
+Namibia
+Niger
+Malawi
+Mauritania
+Nigeria
+Rwanda
+W. Sahara
+Sudan
+Sierra Leone
+S. Sudan
+Senegal
+Somalia
+Somaliland
+Swaziland
+Chad
+Tunisia
+South Africa
+Togo
+Tanzania
+Zambia
+Uganda
+Zimbabwe
+Australia
+Fiji
+New Caledonia
+New Zealand
+Solomon Is.
+Papua New Guinea
+Vanuatu
+Albania
+Austria
+Belgium
+Bulgaria
+Bosnia and Herz.
+Denmark
+Switzerland
+Czech Rep.
+Belarus
+Spain
+Germany
+Estonia
+Finland
+Hungary
+United Kingdom
+France
+Croatia
+Greece
+Ireland
+Iceland
+Luxembourg
+Kosovo
+Italy
+Lithuania
+Latvia
+Moldova
+Macedonia
+Netherlands
+Montenegro
+Poland
+Romania
+Norway
+Portugal
+Serbia
+Slovenia
+Russia
+Slovakia
+Sweden
+Ukraine
