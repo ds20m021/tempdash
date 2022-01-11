@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import folium
 from streamlit_folium import folium_static
 import geopandas as gpd
+import seaborn as sns
+import requests
 #st.set_page_config(layout="wide")
 
 st.title('Global Temperatures')
@@ -28,18 +30,36 @@ data_load_state = st.text('Loading data...')
 data = load_data()
 data_load_state.text('')
 
-year_to_filter = st.slider('year', min_value=1743, max_value=2013, step=1)
+year_to_filter = st.slider('year', min_value=1743, max_value=2013, step=1, value=2010)
+selected_country = "Italy"
+r = requests.get('http://localhost:8123/countries')
+if r.status_code == 200:
+    selected_country = st.selectbox("Which country to compare?", r.json()["countries"])
+
+
+fig = plt.figure()
 
 dsp = data[data["Country"] == "world"]
 filtered = dsp[dsp["year"] < year_to_filter]
-import matplotlib
-import seaborn as sns
-#matplotlib.rcParams['axes.grid'] = True
-#matplotlib.rcParams['savefig.transparent'] = True
-#dsp = data[(data["Country"] == "Austria") | (data["Country"] == "Norway")]
-fig = plt.figure()
-sns.lineplot(data=filtered, x="year", y="AverageTemperature", alpha=1, palette=['blue'])
-sns.lineplot(data=dsp, x="year", y="AverageTemperature", alpha=0.3, palette=['blue'])
+sns.lineplot(data=dsp, x="year", y="AverageTemperature", alpha=0.3, palette=sns.color_palette(["#001c7f"]))
+sns.lineplot(data=filtered, x="year", y="AverageTemperature", alpha=1, palette=sns.color_palette(["#001c7e"]), label='World')
+
+
+dsp = data[data["Country"] == selected_country]
+filtered = dsp[dsp["year"] < year_to_filter]
+sns.lineplot(data=dsp, x="year", y="AverageTemperature", alpha=0.3, palette=sns.color_palette(["#b1400d"]))
+sns.lineplot(data=filtered, x="year", y="AverageTemperature", alpha=1, palette=sns.color_palette(["#b0400d"]), label=selected_country)
+preddata = filtered.sort_values(by="year",ascending=False)
+if preddata["year"].count() > 10:
+    body = list(preddata.head(10)["AverageTemperature"])
+    r = requests.post('http://localhost:8123/'+selected_country, json=body)
+    if r.status_code == 200:
+        predresult = pd.DataFrame({"year": list(range(year_to_filter+1, year_to_filter+11)), "AverageTemperature": r.json()["temperatures_predicted"]})
+        sns.lineplot(data=predresult, x="year", y="AverageTemperature", alpha=1, palette=sns.color_palette(["#00FF00"]),
+                     label=selected_country + " prediction")
+
+
+
 
 st.pyplot(fig)
 
