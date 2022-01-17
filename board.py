@@ -42,36 +42,38 @@ year_to_filter = st.slider('year', min_value=1743, max_value=2013, step=1, value
 selected_country = "Italy"
 r = requests.get(predURL+'countries')
 if r.status_code == 200:
-    selected_country = st.selectbox("Which country to compare?", r.json()["countries"])
+    cs = r.json()["countries"]
+    cs.remove("World")
+    selected_country = st.selectbox("Which country to compare?", cs )
 
+pal = sns.color_palette(["#001c7f","#001c7f","#001c7f","#b1400d","#b1400d","#b1400d"])
 
 fig = plt.figure()
 
 dsp = data[data["Country"] == "World"]
 filtered = dsp[dsp["year"] < year_to_filter]
-sns.lineplot(data=dsp, x="year", y="AverageTemperature", alpha=0.3, palette=sns.color_palette(["#001c7f"]))
-sns.lineplot(data=filtered, x="year", y="AverageTemperature", alpha=1, palette=sns.color_palette(["#001c7e"]), label='World')
+sns.lineplot(data=dsp, x="year", y="AverageTemperature", alpha=0.3, palette=pal)
+sns.lineplot(data=filtered, x="year", y="AverageTemperature", alpha=1, palette=pal, label='World')
 preddata = filtered.sort_values(by="year",ascending=False)
 if preddata["year"].count() > 10:
     body = list(preddata.head(10)["AverageTemperature"])
     r = requests.post(predURL+"World", json=body)
     if r.status_code == 200:
         predresult = pd.DataFrame({"year": list(range(year_to_filter, year_to_filter+10)), "AverageTemperature": r.json()["temperatures_predicted"]})
-        sns.lineplot(data=predresult, x="year", y="AverageTemperature", alpha=1, palette=sns.color_palette(["#00FF00"]),
-                     label=selected_country + " prediction")
+        sns.lineplot(data=predresult, x="year", y="AverageTemperature", alpha=1, palette=pal, label= "World prediction")
 
 
 dsp = data[data["Country"] == selected_country]
 filtered = dsp[dsp["year"] < year_to_filter]
-sns.lineplot(data=dsp, x="year", y="AverageTemperature", alpha=0.3, palette=sns.color_palette(["#b1400d"]))
-sns.lineplot(data=filtered, x="year", y="AverageTemperature", alpha=1, palette=sns.color_palette(["#b0400d"]), label=selected_country)
+sns.lineplot(data=dsp, x="year", y="AverageTemperature", alpha=0.3, palette=pal)
+sns.lineplot(data=filtered, x="year", y="AverageTemperature", alpha=1, palette=pal, label=selected_country)
 preddata = filtered.sort_values(by="year",ascending=False)
 if preddata["year"].count() > 10:
     body = list(preddata.head(10)["AverageTemperature"])
     r = requests.post(predURL+selected_country, json=body)
     if r.status_code == 200:
         predresult = pd.DataFrame({"year": list(range(year_to_filter, year_to_filter+10)), "AverageTemperature": r.json()["temperatures_predicted"]})
-        sns.lineplot(data=predresult, x="year", y="AverageTemperature", alpha=1, palette=sns.color_palette(["#00FF00"]),
+        sns.lineplot(data=predresult, x="year", y="AverageTemperature", alpha=1, palette=pal,
                      label=selected_country + " prediction")
 
 
