@@ -1,11 +1,14 @@
+#https://stdworkflow.com/127/error-command-errored-out-with-exit-status-1-when-install-geopandas
+import numpy as np
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import folium
-from streamlit_folium import folium_static
-import geopandas as gpd
+from streamlit_folium import folium_static #https://pypi.org/project/streamlit-folium/
+#import geopandas as gpd
 import seaborn as sns
 import requests
+import time
 #st.set_page_config(layout="wide")
 
 st.title('Global Temperatures')
@@ -31,6 +34,8 @@ data = load_data()
 data_load_state.text('')
 
 predURL = "https://ds20m008-autopublisher-project.azurewebsites.net/"
+
+
 
 
 year_to_filter = st.slider('year', min_value=1743, max_value=2013, step=1, value=2010)
@@ -73,6 +78,52 @@ if preddata["year"].count() > 10:
 
 
 st.pyplot(fig)
+
+
+
+##animated temp plot
+fig, ax = plt.subplots()
+
+
+avg_temperatures=dsp.groupby(by="year").agg({'AverageTemperature': 'mean'}).reset_index()
+avg_temperatures=avg_temperatures.tail(30)
+
+
+ax.set_ylim(0, avg_temperatures.AverageTemperature.max()*1.4)
+
+animated_line_temp_plot, = ax.plot(avg_temperatures.year, avg_temperatures.AverageTemperature)
+the_plot = st.pyplot(plt)
+
+
+
+
+def animate(year_offset):
+    #get prediction
+    previous_values=avg_temperatures.AverageTemperature[year_offset-10:year_offset]
+    #print(previous_values)
+    body = list(previous_values)
+    r = requests.post(predURL+"World", json=body)
+    if r.status_code == 200:
+        curr_plot=ax.plot(avg_temperatures.year[year_offset:year_offset+10], r.json()["temperatures_predicted"], color='tab:orange')
+        the_plot.pyplot(plt)
+        return curr_plot
+    return None
+
+def start_animation():
+    for year_offset in range(10,len(avg_temperatures.year)-10):
+        res=animate(year_offset)
+        #time.sleep(0.1)
+        if(res!=None):
+            ax.lines.pop(1)
+
+if st.button("Animate"):
+    start_animation()
+
+
+
+
+
+###geo json
 
 geoJSON_df = gpd.read_file("countries.geo.json")
 #countries = pd.read_csv("countries.geo.json")
@@ -141,6 +192,8 @@ geojson1 = folium.features.GeoJson(
 ##)
 #m.add_child(c)
 #m.keep_in_front(NIL)
+
+
 
 
 
