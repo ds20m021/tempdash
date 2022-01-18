@@ -87,6 +87,7 @@ st.pyplot(fig)
 fig, ax = plt.subplots()
 
 
+
 avg_temperatures=dsp.groupby(by="year").agg({'AverageTemperature': 'mean'}).reset_index()
 avg_temperatures=avg_temperatures.tail(30)
 
@@ -104,9 +105,14 @@ def animate(year_offset):
     previous_values=avg_temperatures.AverageTemperature[year_offset-10:year_offset]
     #print(previous_values)
     body = list(previous_values)
-    r = requests.post(predURL+"World", json=body)
+    r = requests.post(predURL+selected_country, json=body)
     if r.status_code == 200:
         curr_plot=ax.plot(avg_temperatures.year[year_offset:year_offset+10], r.json()["temperatures_predicted"], color='tab:orange')
+        ax.axvline(list(avg_temperatures.year)[year_offset],color="orange")
+        print(str(avg_temperatures.year))
+        ax.set_title("Prediction at " + str(list(avg_temperatures.year)[int(year_offset)]))
+        ax.set_xlabel("Year")
+        ax.set_ylabel("Temperature")
         the_plot.pyplot(plt)
         return curr_plot
     return None
@@ -116,6 +122,7 @@ def start_animation():
         res=animate(year_offset)
         #time.sleep(0.1)
         if(res!=None):
+            ax.lines.pop(1)
             ax.lines.pop(1)
 
 if st.button("Animate"):
