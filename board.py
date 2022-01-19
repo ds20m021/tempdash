@@ -38,7 +38,7 @@ predURL = "https://ds20m008-autopublisher-project.azurewebsites.net/"
 
 
 
-year_to_filter = st.slider('year', min_value=1743, max_value=2013, step=1, value=2010)
+year_to_filter = st.slider('year', min_value=1743, max_value=2013, step=1, value=1950)
 selected_country = "Italy"
 r = requests.get(predURL+'countries')
 if r.status_code == 200:
@@ -86,7 +86,8 @@ st.pyplot(fig)
 ##animated temp plot
 fig, ax = plt.subplots()
 
-
+ax.set_xlabel("Year")
+ax.set_ylabel("Temperature")
 
 avg_temperatures=dsp.groupby(by="year").agg({'AverageTemperature': 'mean'}).reset_index()
 avg_temperatures=avg_temperatures.tail(30)
