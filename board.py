@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import folium
 from streamlit_folium import folium_static #https://pypi.org/project/streamlit-folium/
-#import geopandas as gpd
+import geopandas as gpd
 import seaborn as sns
 import requests
 import time
