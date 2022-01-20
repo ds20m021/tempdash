@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import folium
 from streamlit_folium import folium_static #https://pypi.org/project/streamlit-folium/
-import geopandas as gpd
+#import geopandas as gpd
 import seaborn as sns
 import requests
 import time
@@ -19,18 +19,19 @@ def load_data():
     data = data[["Country", "dt", "AverageTemperature"]]
     data['year'] = data["dt"].dt.year
     data = data.dropna(axis=0)
+    data_raw=data.loc[:,:]
 
     data = data.groupby(['year', 'Country']).agg({'AverageTemperature': 'mean'}).reset_index()
     worldData = data.groupby(['year']).agg({'AverageTemperature': 'mean'}).reset_index()
     worldData['Country'] = "World"
     data = pd.concat([data, worldData])
     #data = data.rename(columns={'year': 'index'}).set_index('index')
-    return data
+    return (data,data_raw)
 
 
 
 data_load_state = st.text('Loading data...')
-data = load_data()
+data,data_raw = load_data()
 data_load_state.text('')
 
 predURL = "https://ds20m008-autopublisher-project.azurewebsites.net/"
@@ -41,12 +42,52 @@ predURL = "https://ds20m008-autopublisher-project.azurewebsites.net/"
 year_to_filter = st.slider('year', min_value=1743, max_value=2013, step=1, value=1950)
 selected_country = "Italy"
 r = requests.get(predURL+'countries')
+cs=None
 if r.status_code == 200:
     cs = r.json()["countries"]
     cs.remove("World")
     selected_country = st.selectbox("Which country to compare?", cs )
 
 pal = sns.color_palette(["#001c7f","#001c7f","#001c7f","#b1400d","#b1400d","#b1400d"])
+
+
+
+
+
+
+
+#violine plots
+data_violin=data.loc[data.Country.isin(cs),:]
+
+#create palette
+my_pal={}
+
+for c in cs:
+    if c==selected_country:
+        my_pal[c]="red"
+    else:
+        my_pal[c]="gray"
+
+fig = plt.figure(figsize=(10, 4))
+sns.violinplot(x=data_violin["Country"], y=data_violin["AverageTemperature"],palette=my_pal)
+st.pyplot(fig)
+
+
+
+#facet plot
+data_of_country=data_raw.loc[data_raw.Country==selected_country,:]
+data_of_country=data_of_country.loc[(data_of_country["year"]>year_to_filter) & (data_of_country["year"]<year_to_filter+5),:]
+
+
+#fig = plt.figure(figsize=(10, 4))
+ridge_plot = sns.FacetGrid(data_of_country, row="year", hue="year", aspect=5, height=1.25)
+ridge_plot.map(sns.kdeplot, "AverageTemperature", clip_on=False, shade=True, alpha=0.7, lw=4, bw=.2)
+ridge_plot.map(plt.axhline, y=0, lw=4, clip_on=False)
+
+st.pyplot(ridge_plot)
+
+
+
 
 fig = plt.figure()
 
@@ -87,31 +128,36 @@ st.pyplot(fig)
 fig, ax = plt.subplots()
 
 ax.set_xlabel("Year")
-ax.set_ylabel("Temperature")
+ax.set_ylabel("AverageTemperature")
+ax.set_title("Average Temperature")
+
 
 avg_temperatures=dsp.groupby(by="year").agg({'AverageTemperature': 'mean'}).reset_index()
-avg_temperatures=avg_temperatures.tail(30)
+avg_temperatures_selection=avg_temperatures.loc[(avg_temperatures.year>=year_to_filter-10) & (avg_temperatures.year<=year_to_filter+11),:]
 
 
-ax.set_ylim(0, avg_temperatures.AverageTemperature.max()*1.4)
+ax.set_ylim(0, avg_temperatures_selection.AverageTemperature.max()*1.4)
 
-animated_line_temp_plot, = ax.plot(avg_temperatures.year, avg_temperatures.AverageTemperature)
+
+animated_line_temp_plot, = ax.plot(avg_temperatures_selection.year, avg_temperatures_selection.AverageTemperature)
 the_plot = st.pyplot(plt)
 
 
 
 
 def animate(year_offset):
+    year_to_predict=list(avg_temperatures_selection.year)[year_offset]
+    print("year to predict: " + str(year_to_predict))
     #get prediction
-    previous_values=avg_temperatures.AverageTemperature[year_offset-10:year_offset]
+    previous_values=avg_temperatures.loc[(avg_temperatures.year>=year_to_predict-10) & (avg_temperatures.year<year_to_predict),"AverageTemperature"]
     #print(previous_values)
     body = list(previous_values)
     r = requests.post(predURL+selected_country, json=body)
     if r.status_code == 200:
-        curr_plot=ax.plot(avg_temperatures.year[year_offset:year_offset+10], r.json()["temperatures_predicted"], color='tab:orange')
-        ax.axvline(list(avg_temperatures.year)[year_offset],color="orange")
-        print(str(avg_temperatures.year))
-        ax.set_title("Prediction at " + str(list(avg_temperatures.year)[int(year_offset)]))
+        curr_plot=ax.plot(range(year_to_predict,year_to_predict+10), r.json()["temperatures_predicted"], color='tab:orange')
+        ax.axvline(list(avg_temperatures_selection.year)[year_offset],color="orange")
+        #print(str(avg_temperatures.year))
+        ax.set_title("Prediction at " + str(year_to_predict))
         ax.set_xlabel("Year")
         ax.set_ylabel("Temperature")
         the_plot.pyplot(plt)
@@ -119,7 +165,7 @@ def animate(year_offset):
     return None
 
 def start_animation():
-    for year_offset in range(10,len(avg_temperatures.year)-10):
+    for year_offset in range(0,10):
         res=animate(year_offset)
         #time.sleep(0.1)
         if(res!=None):
@@ -134,6 +180,8 @@ if st.button("Animate"):
 
 
 ###geo json
+
+
 
 geoJSON_df = gpd.read_file("countries.geo.json")
 #countries = pd.read_csv("countries.geo.json")
@@ -209,5 +257,7 @@ geojson1 = folium.features.GeoJson(
 
 #folium.features.GeoJson()
 folium_static(m)
+
+
 
 
