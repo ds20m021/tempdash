@@ -124,7 +124,7 @@ with col1:
     st.title("Temperatures in a year in "+selected_country)
     ridge_plot = sns.FacetGrid(data_of_country, row="year", hue="year", aspect=5, height=1.25)
     ridge_plot.map_dataframe(sns.lineplot, x="day", y="AverageTemperature")
-    ridge_plot.set_axis_labels("Temperature [°C]", "Day of the year")
+    ridge_plot.set_axis_labels("Day of the year", "Temperature [°C]")
     #ridge_plot.map(plt.axhline, y=0, lw=4, clip_on=False)
 
     st.pyplot(ridge_plot)
